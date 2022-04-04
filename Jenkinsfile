@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout Source Code') {
             steps {
-                git branch: 'master', url: 'https://github.com/devsecops-test/io-coverity-sample'
+                git branch: 'master', url: 'https://github.com/io-poc/bns-poc'
             }
         }
 
@@ -27,19 +27,19 @@ pipeline {
                 synopsysIO(connectors: [
                     io(
                         configName: 'poc-io',
-                        projectName: 'devsecops-insec-bank',
+                        projectName: 'insecure-bank',
                         workflowVersion: '2021.12.4'),
                     github(
                         branch: 'master',
                         configName: 'poc-github',
-                        owner: 'devsecops-test',
-                        repositoryName: 'io-coverity-sample'), 
+                        owner: 'io-poc',
+                        repositoryName: 'bns-poc'), 
                      jira(
                          assignee: 'karn@synopsys.com', 
                          configName: 'poc-jira', 
                          issueQuery: 'resolution=Unresolved', 
                          projectKey: 'INSEC', 
-                         projectName: 'insec-bank'), 
+                         projectName: 'insecure-bank'), 
                     buildBreaker(configName: 'poc-bb')]) {
                         sh 'io --stage io Persona.Type=devsecops Project.Release.Type=minor'
                     }
@@ -59,17 +59,18 @@ pipeline {
         }
 
 
-        stage('SAST - Coverity') {
-          when {
-            expression { isSASTEnabled }
-          }
-          steps {
-            echo 'Running SAST using Coverity'
-            synopsysIO(connectors: [
-            coverity(configName: 'poc-coverity'
-            )]) {
-              sh 'io --stage execution --state io_state.json'
-              }
+        stage('SAST - Polaris') {
+            when {
+                expression { isSASTEnabled }
+            }
+            steps {
+                echo 'Running SAST using Polaris'
+                synopsysIO(connectors: [
+                    [$class: 'PolarisPipelineConfig',
+                    configName: 'poc-polaris',
+                    projectName: 'insecure-bank']]) {
+                    sh 'io --stage execution --state io_state.json'
+                }
             }
         }
 
@@ -93,7 +94,7 @@ pipeline {
               echo 'Running SCA using BlackDuck'
               synopsysIO(connectors: [
                   blackduck(configName: 'poc-bd',
-                  projectName: 'insec-bank',
+                  projectName: 'insecure-bank',
                   projectVersion: '1.0')]) {
                   sh 'io --stage execution --state io_state.json'
               }
@@ -117,10 +118,8 @@ pipeline {
                 echo 'Execute Workflow Stage'
                 synopsysIO(connectors: [
                     codeDx(configName: 'poc-codedx', projectId: '1'), 
-                    coverity(configName: 'poc-coverity', stream: 'Insec'),
-                    blackduck(configName: 'poc-bd', projectName: 'insec-bank', projectVersion: '1.0'),
                     jira(assignee: 'karn@synopsys.com', configName: 'poc-jira', issueQuery: 'resolution=Unresolved AND labels in (Security, Defect)', projectKey: 'INSEC'), 
-                    //msteams(configName: 'poc-msteams'), 
+                    msteams(configName: 'poc-msteams'), 
                     buildBreaker(configName: 'poc-bb')
                 ]) {
                     sh 'io --stage workflow --state io_state.json'
@@ -144,8 +143,8 @@ pipeline {
                     //Build Breaker
                     if(workflowJSON.breaker.status==true) {
                           echo "Sending Notifications to Teams..."
-                          //curl -H 'Content-Type: application/json' -d '{"text": "Breaking the build for application: Insecure Bank"}' <Add_WebHook_URL>
-                          echo "Breaking the build based on the identified Vulnerabilities. Setting pipeline to fail"
+                          //sh 'curl -H \'Content-Type: application/json\' -d \'{"text": "Breaking the build for application: Insecure Bank"}\' <Add_WebHook_URL>'
+                          echo "Insecure-Bank has identified vulnerabilities and it requires your attention!"
                           //exit 1
                     }
                     
