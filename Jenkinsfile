@@ -119,7 +119,7 @@ pipeline {
                 synopsysIO(connectors: [
                     codeDx(configName: 'poc-codedx', projectId: '1'), 
                     jira(assignee: 'karn@synopsys.com', configName: 'poc-jira', issueQuery: 'resolution=Unresolved AND labels in (Security, Defect)', projectKey: 'INSEC'), 
-                    msteams(configName: 'poc-msteams'), 
+                    //msteams(configName: 'poc-msteams'), 
                     buildBreaker(configName: 'poc-bb')
                 ]) {
                     sh 'io --stage workflow --state io_state.json'
@@ -143,7 +143,7 @@ pipeline {
                     //Build Breaker
                     if(workflowJSON.breaker.status==true) {
                           echo "Sending Notifications to Teams..."
-                          //sh 'curl -H \'Content-Type: application/json\' -d \'{"text": "Breaking the build for application: Insecure Bank"}\' "https://synopsyssig.webhook.office.com/webhookb2/ce20f176-4d07-41c8-8a7b-cf6c66254b84@99f3f5c1-a294-451e-9e1e-b3bbc8d9e4ba/IncomingWebhook/dd5340edfc7144cfa752da8f33dcdc6b/19b0d4ae-c36c-423e-b436-2a4780775ce3"'
+                          sh 'curl -H \'Content-Type: application/json\' -d \'{"text": "Breaking the build for application: Insecure Bank"}\' "https://synopsyssig.webhook.office.com/webhookb2/ce20f176-4d07-41c8-8a7b-cf6c66254b84@99f3f5c1-a294-451e-9e1e-b3bbc8d9e4ba/IncomingWebhook/dd5340edfc7144cfa752da8f33dcdc6b/19b0d4ae-c36c-423e-b436-2a4780775ce3"'
                           echo "Insecure-Bank has identified vulnerabilities and it requires your attention!"
                           //exit 1
                     }
