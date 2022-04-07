@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout Source Code') {
             steps {
-                git branch: 'master', url: 'https://github.com/io-poc/bns-poc'
+                git branch: 'master', url: 'https://github.com/io-poc/io-poc-1'
             }
         }
 
@@ -33,7 +33,7 @@ pipeline {
                         branch: 'master',
                         configName: 'poc-github',
                         owner: 'io-poc',
-                        repositoryName: 'bns-poc'), 
+                        repositoryName: 'io-poc-1'), 
                      jira(
                          assignee: 'karn@synopsys.com', 
                          configName: 'poc-jira', 
