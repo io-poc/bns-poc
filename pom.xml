@@ -65,7 +65,7 @@
 									<cargo.jvmargs>
 										<!-- Hdiv JVM arguments -->
 									</cargo.jvmargs>
-									<cargo.servlet.port>8080</cargo.servlet.port>
+									<cargo.servlet.port>8989</cargo.servlet.port>
 									<cargo.tomcat.ajp.port>8009</cargo.tomcat.ajp.port>
 									<cargo.rmi.port>8205</cargo.rmi.port>
 								</properties>
